@@ -4,7 +4,10 @@
     <div class="container py-5">
         
         {% for lista in listan %}
-            <h1>{{lista.list_name}}</h1>
+            <h1>{{lista.list_name}}
+
+                <a href="{% url 'lista-uppdatera' lista.id %}"><i class="bi bi-pencil-square"></i></a>
+            </h1>
         {% endfor %}
 
         <table>

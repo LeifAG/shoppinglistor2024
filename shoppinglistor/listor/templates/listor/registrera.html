@@ -6,10 +6,14 @@
 <form method="POST">
     {% csrf_token %}
     <fieldset>
-        <legend>Ny Vara</legend>
+        <legend>Skapa konto</legend>
         {{ form|crispy }}
     </fieldset>
-    <button class="btn btn-primary" type="submit">Spara vara</button>
+    <button class="btn btn-primary" type="submit">Registrera</button>
 </form>
-    </div>
+    <p class="text-center">Har du redan ett konto, 
+    <a href="{% url 'loggain' %}">logga in</a>
+    istället.</p>
+
+</div>
 {% endblock innehall %}
