@@ -28,8 +28,11 @@
         </div>
         <div class="navbar-nav ms-auto">
           {% if user.is_authenticated %}
-          <a class="nav-link" href="{% url 'loggaut' %}">Logga ut</a>
-        {% else %}
+          <form method="POST" action="{% url 'loggaut' %}">
+            {% csrf_token %}
+            <button class="nav-link" type="submit">Logga ut</button>
+          </form>
+          {% else %}
           <a class="nav-link" href="{% url 'loggain' %}">Logga in</a>
           <a class="nav-link" href="{% url 'registrera' %}">Registrera</a>
         {% endif %}
