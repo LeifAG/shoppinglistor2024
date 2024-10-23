@@ -2,9 +2,10 @@ from typing import Any
 from django.db.models.query import QuerySet
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.http import HttpResponseRedirect
 from .models import List, Item
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View
 from .forms import UserRegisterForm
 from django.contrib import messages
 
@@ -89,6 +90,37 @@ class RaderaVara(LoginRequiredMixin,DeleteView):
     def get_success_url(self):
         lista = self.object.list
         return reverse_lazy('lista-sida', kwargs={'pk':lista.id})
+    
+class RensaVaror(LoginRequiredMixin,UserPassesTestMixin,View):
+    template_name = 'listor/confirm_delete_purchased.html'
+
+    def get_success_url(self):
+        lista = get_object_or_404(List, id=self.kwargs.get('pk'))
+        return reverse_lazy('lista-sida', kwargs={'pk':lista.id})
+    
+    def test_func(self):
+        user = self.request.user
+        list_pk = self.kwargs['pk']
+        lista = get_object_or_404(List, pk=list_pk)
+        return user == lista.list_user
+    
+    def get(self, request, *args, **kwargs):
+        context={}
+        list_pk = self.kwargs.get('pk')
+        items_to_delete = Item.objects.filter(list__pk=list_pk, purchased=True)
+        if not items_to_delete.exists():
+            messages.warning(request, 'Det finns inga markerade varor att radera.')
+            return HttpResponseRedirect(reverse_lazy('lista-sida', kwargs={'pk':list_pk}))
+        context['items'] = items_to_delete
+        context['lista'] = {'listID' : list_pk}
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        list_pk = self.kwargs.get('pk')
+        items_to_delete = Item.objects.filter(list__pk=list_pk, purchased=True)
+        items_to_delete.delete()
+        success_url = self.get_success_url()
+        return HttpResponseRedirect(success_url)
     
 def registrera(request):
     if request.method == 'POST':
