@@ -28,6 +28,12 @@ class EnLista(LoginRequiredMixin,ListView):
         context=super().get_context_data(**kwargs)
         context['listan'] = List.objects.filter(id=self.kwargs['pk'])
         return context
+    
+    def post(self, request, *args, **kwargs):
+        obj = get_object_or_404(Item, pk=request.POST.get('item_id'))
+        obj.purchased = not obj.purchased
+        obj.save()
+        return redirect('lista-sida', pk=self.kwargs['pk'])
 
 class NyLista(LoginRequiredMixin,CreateView):
     model = List
@@ -71,6 +77,12 @@ class NyVara(LoginRequiredMixin,CreateView):
     model = Item
     fields = ['item_name', 'amount']
 
+    def get_context_data(self,**kwargs):
+        context=super().get_context_data(**kwargs)
+        lista=get_object_or_404(List,id=self.kwargs.get('pk'))
+        context['status'] = {"status":"Ny",'listID':lista.id}
+        return context
+
     def form_valid(self,form):
         form.instance.list=get_object_or_404(List,id=self.kwargs.get('pk'))
         return super().form_valid(form)
@@ -81,12 +93,12 @@ class UppdateraVara(LoginRequiredMixin,UpdateView):
 
     def get_context_data(self,**kwargs):
         context=super().get_context_data(**kwargs)
-        context['status'] = {'status':'Uppdatera'}
+        context['status'] = {"status":"Uppdatera"}
         return context
     
 class RaderaVara(LoginRequiredMixin,DeleteView):
     model = Item
-
+    
     def get_success_url(self):
         lista = self.object.list
         return reverse_lazy('lista-sida', kwargs={'pk':lista.id})

@@ -15,7 +15,7 @@ class List(models.Model):
         return reverse('lista-sida',kwargs={'pk':self.pk})
 
 class Item(models.Model):
-    item_name=models.CharField(max_length=255)
+    item_name=models.CharField('Varans namn',max_length=255)
     amount=models.IntegerField(default=1)
     purchased=models.BooleanField(default=False)
     list=models.ForeignKey(List,on_delete=models.CASCADE)
