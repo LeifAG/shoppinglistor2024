@@ -16,6 +16,9 @@ class AllaListor(LoginRequiredMixin,ListView):
     context_object_name = 'listor'
     ordering = ['created_date']
 
+    def get_queryset(self):
+        return List.objects.filter(list_user=self.request.user)
+
 class EnLista(LoginRequiredMixin,ListView):
     model=Item
     template_name = 'listor/lista.html'
