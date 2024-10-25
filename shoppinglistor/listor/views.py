@@ -3,7 +3,8 @@ from django.db.models.query import QuerySet
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
-from .models import List, Item
+from .models import List, Item, SharedList
+from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View
 from .forms import UserRegisterForm
@@ -137,6 +138,29 @@ class RensaVaror(LoginRequiredMixin,UserPassesTestMixin,View):
         success_url = self.get_success_url()
         return HttpResponseRedirect(success_url)
     
+class SharedListCreateView(LoginRequiredMixin,CreateView):
+    model: SharedList
+    fields = ['email']
+
+    def get_success_url(self):
+        return reverse_lazy('lista-sida', kwargs={'pk':self.kwargs['pk']})
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['listID'] = self.kwargs.get('pk')
+        return context
+    
+    def form_valid(self,form):
+        email = form.cleaned_data['email']
+        try:
+            user = User.objects.get(email=email)
+            form.instance.user = user
+            form.instance.list = List.objects.get(pk=self.kwargs['pk'])
+            return super().form_valid(form)
+        except User.DoesNotExist:
+            form.add_error('email', f'Ingen användare med {email}')
+            return self.form_invalid(form)
+
 def registrera(request):
     if request.method == 'POST':
         form=UserRegisterForm(request.POST)

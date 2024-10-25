@@ -25,7 +25,7 @@ class Item(models.Model):
     
     def get_absolute_url(self):
         return reverse('lista-sida',kwargs={'pk':self.list.pk})
-    
+
 class SharedList(models.Model):
     list = models.ForeignKey(List, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='list_shared')
