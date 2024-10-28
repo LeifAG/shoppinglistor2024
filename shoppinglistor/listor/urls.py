@@ -9,6 +9,7 @@ urlpatterns = [
     path('lista/<int:pk>/uppdatera', views.UppdateraLista.as_view(), name='lista-uppdatera'),
     path('lista/<int:pk>/radera', views.RaderaLista.as_view(), name='lista-radera'),
     path('lista/ny/', views.NyLista.as_view(), name='lista-ny'),
+    path('lista/<int:pk>/dela', views.SharedListCreateView.as_view(), name='lista-dela'),
     
     path('vara/<int:pk>/uppdatera', views.UppdateraVara.as_view(), name='vara-uppdatera'),
     path('vara/<int:pk>/radera', views.RaderaVara.as_view(), name='vara-radera'),

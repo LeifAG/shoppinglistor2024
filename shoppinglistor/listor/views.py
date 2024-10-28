@@ -18,7 +18,8 @@ class AllaListor(LoginRequiredMixin,ListView):
     ordering = ['created_date']
 
     def get_queryset(self):
-        return List.objects.filter(list_user=self.request.user)
+        queryset = List.objects.filter(list_user=self.request.user) | List.objects.filter(sharedlist__user=self.request.user)
+        return queryset.distinct()
 
 class EnLista(LoginRequiredMixin,ListView):
     model=Item
@@ -139,7 +140,7 @@ class RensaVaror(LoginRequiredMixin,UserPassesTestMixin,View):
         return HttpResponseRedirect(success_url)
     
 class SharedListCreateView(LoginRequiredMixin,CreateView):
-    model: SharedList
+    model = SharedList
     fields = ['email']
 
     def get_success_url(self):
@@ -156,6 +157,10 @@ class SharedListCreateView(LoginRequiredMixin,CreateView):
             user = User.objects.get(email=email)
             form.instance.user = user
             form.instance.list = List.objects.get(pk=self.kwargs['pk'])
+            list_instance = form.instance.list
+            if SharedList.objects.filter(user=user,list=list_instance).exists():
+                form.add_error('email',f'{email} har redan delats denna lista.')
+                return self.form_invalid(form)
             return super().form_valid(form)
         except User.DoesNotExist:
             form.add_error('email', f'Ingen användare med {email}')
